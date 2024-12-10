@@ -1,0 +1,7 @@
+@function to-color($color) {
+  @return $color;
+}
+
+* {
+  color: to-color("red");
+}
