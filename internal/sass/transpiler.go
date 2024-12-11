@@ -69,8 +69,8 @@ func (t *Transpiler) logHandler(e godartsass.LogEvent) {
 }
 
 // Close closes the underlying *[godartsass.Transpiler].
-func (r *Transpiler) Close() error {
-	return r.tp.Close()
+func (t *Transpiler) Close() error {
+	return t.tp.Close()
 }
 
 // Transpile converts Scss source files into CSS. The path argument should be
