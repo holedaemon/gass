@@ -15,13 +15,15 @@ type transpileOptions struct {
 }
 
 // Args converts specified options into a [godartsass.Args].
-func (to *transpileOptions) Args(src string) (godartsass.Args, error) {
+func (to *transpileOptions) Args(src string, ir godartsass.ImportResolver, includePaths ...string) (godartsass.Args, error) {
 	args := godartsass.Args{
 		Source:                  src,
 		SourceSyntax:            to.syntax,
 		OutputStyle:             to.style,
 		EnableSourceMap:         to.sourceMaps,
 		SourceMapIncludeSources: to.embedSources,
+		ImportResolver:          ir,
+		IncludePaths:            includePaths,
 	}
 
 	if args.Source == "" {
@@ -31,7 +33,7 @@ func (to *transpileOptions) Args(src string) (godartsass.Args, error) {
 	return args, nil
 }
 
-// TranspileOption are used to configure a *[godartsass.Transpiler].
+// TranspileOption is used to configure a *[godartsass.Transpiler].
 type TranspileOption func(*transpileOptions)
 
 // Compressed configures a *[godartsass.Transpiler] to output minified CSS.

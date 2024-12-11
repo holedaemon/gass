@@ -1,3 +1,5 @@
+@use "nested/import";
+
 @function to-color($color) {
   @return $color;
 }

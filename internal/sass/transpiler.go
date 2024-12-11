@@ -107,8 +107,13 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 
 		inputFile.Close()
 
+		relativeDirs, err := src.Relative()
+		if err != nil {
+			return fmt.Errorf("collecting relative dirs: %w", err)
+		}
+
 		t.l.Debug("converting options into arguments")
-		args, err := to.Args(buf.String())
+		args, err := to.Args(buf.String(), new(ImportResolver), relativeDirs...)
 		if err != nil {
 			return fmt.Errorf("creating args: %w", err)
 		}

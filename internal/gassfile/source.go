@@ -3,6 +3,7 @@ package gassfile
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -50,6 +51,25 @@ func NewSource(input, output string) (*Source, error) {
 // Input returns the input path of the Source.
 func (s *Source) Input() string {
 	return s.input
+}
+
+// Relative returns a slice containing absolute paths to directories relative
+// to the input of the Source.
+func (s *Source) Relative() ([]string, error) {
+	dir := filepath.Dir(s.input)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	rd := make([]string, 0)
+	for _, e := range entries {
+		if e.IsDir() {
+			rd = append(rd, filepath.Join(dir, e.Name()))
+		}
+	}
+
+	return rd, nil
 }
 
 func (s *Source) outputName() string {
