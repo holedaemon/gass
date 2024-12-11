@@ -41,6 +41,7 @@ The Gassfile also "supports" comments; if a line starts with a '#', `gass` will 
 The following are used to configure the transpiler itself.
 
 ```
+-h    Output help.
 -f    Path to the Gassfile to use. Defaults to ".gassfile".
 -d    Starts the transpiler in debug mode. Defaults to false.
 -b    Path to the dart-sass binary to use as a backend. Default is blank as the transpiler will attempt to infer.
