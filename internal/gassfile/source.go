@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -36,7 +37,7 @@ func NewSource(input, output string) (*Source, error) {
 	}
 
 	ext := filepath.Ext(input)
-	if !stringInSlice(ext, validExts) {
+	if !slices.Contains(validExts, ext) {
 		return nil, fmt.Errorf("gassfile: source: %s ends with an unrecognized extension", input)
 	}
 
