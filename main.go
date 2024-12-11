@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
@@ -9,9 +10,11 @@ import (
 	"github.com/bep/godartsass/v2"
 	"github.com/holedaemon/gass/internal/logger"
 	"github.com/holedaemon/gass/internal/sass"
+	"github.com/holedaemon/gass/internal/version"
 )
 
 func main() {
+	versionFlag := flag.Bool("v", false, "Display gass' version")
 	gassfilePath := flag.String("f", ".gassfile", "Path to Gassfile to use for transpilation")
 	debug := flag.Bool("d", false, "Run in debug mode?")
 	compressed := flag.Bool("c", false, "Compress CSS output?")
@@ -22,6 +25,11 @@ func main() {
 	timeout := flag.Duration("t", time.Second*30, "Maximum length of time alloted for transpilation")
 
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Fprintf(os.Stdout, "gass v%s\n", version.Version)
+		os.Exit(0)
+	}
 
 	l := logger.New(*debug)
 	opts := make([]sass.Option, 0)

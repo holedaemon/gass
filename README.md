@@ -41,6 +41,7 @@ The Gassfile also "supports" comments; if a line starts with a '#', `gass` will 
 The following are used to configure the transpiler itself.
 
 ```
+-v    Print the current version of `gass`.
 -h    Output help.
 -f    Path to the Gassfile to use. Defaults to ".gassfile".
 -d    Starts the transpiler in debug mode. Defaults to false.
