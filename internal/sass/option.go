@@ -5,35 +5,35 @@ import (
 	"time"
 )
 
-// Option is used to configure a *[Runner].
-type Option func(*Runner)
+// Option is used to configure a *[Transpiler].
+type Option func(*Transpiler)
 
-// Debug enables debug mode on a *[Runner].
+// Debug enables debug mode on a *[Transpiler].
 func Debug() Option {
-	return func(r *Runner) {
-		r.debug = true
+	return func(t *Transpiler) {
+		t.debug = true
 	}
 }
 
-// SassBinary tells a *[Runner] to use the following binary for transpilation.
+// SassBinary tells a *[Transpiler] to use the following binary for transpilation.
 // It expects path to be an absolute path to a dart-sass binary.
 func SassBinary(path string) Option {
-	return func(r *Runner) {
-		r.binary = path
+	return func(t *Transpiler) {
+		t.binary = path
 	}
 }
 
-// Timeout sets the maximum alloted time a *[Runner] may wait for
+// Timeout sets the maximum alloted time a *[Transpiler] may wait for
 // transpilation.
 func Timeout(dur time.Duration) Option {
-	return func(r *Runner) {
-		r.timeout = dur
+	return func(t *Transpiler) {
+		t.timeout = dur
 	}
 }
 
-// Logger sets the *[slog.Logger] a *[Runner] uses for logging.
+// Logger sets the *[slog.Logger] a *[Transpiler] uses for logging.
 func Logger(l *slog.Logger) Option {
-	return func(r *Runner) {
-		r.l = l
+	return func(t *Transpiler) {
+		t.l = l
 	}
 }
