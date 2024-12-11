@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// New creates a new *[slog.Logger].
+// New creates a new *[slog.Logger], optionally at the debug level.
 func New(debug bool) *slog.Logger {
 	opts := &slog.HandlerOptions{
 		AddSource: false,

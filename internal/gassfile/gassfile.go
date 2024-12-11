@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	// ErrInvalidSource is returned when a [Source] is invalid.
 	ErrInvalidSource = errors.New("gassfile: source is invalid")
 
 	validExts = []string{".scss", ".sass", ".css"}
@@ -52,6 +53,10 @@ func (g *Gassfile) Sources() iter.Seq[*Source] {
 	}
 }
 
+// scan creates a scanner for the input r and iterates over each line of the
+// file. If a line starts with '#', it's accepted as a comment, otherwise the
+// line is split by ' ' and the resulting substrings are used as IO for a
+// [Source].
 func scan(r io.Reader) ([]*Source, error) {
 	scanner := bufio.NewScanner(r)
 	sources := make([]*Source, 0)

@@ -52,16 +52,16 @@ func (s *Source) Input() string {
 }
 
 func (s *Source) outputName() string {
-	outputBase := filepath.Base(s.output)
 	outputExt := filepath.Ext(s.output)
 
 	if strings.EqualFold(outputExt, ".css") {
-		return outputBase
+		return s.output
 	}
 
 	inputBase := filepath.Base(s.input)
 	inputExt := filepath.Ext(s.input)
-	return fmt.Sprintf("%s.css", strings.TrimSuffix(inputBase, inputExt))
+	name := fmt.Sprintf("%s.css", strings.TrimSuffix(inputBase, inputExt))
+	return filepath.Join(s.output, name)
 }
 
 // Output returns the output of the Source.
