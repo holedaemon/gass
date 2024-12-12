@@ -2,7 +2,7 @@
 
 A dead-simple, poorly named [Sass](https://sass-lang.com) transpiler created with the intention of making the simultaneous transpilation of multiple Sass files easy.
 
-`gass` accepts a list of sources in form of a "Gassfile." Which is really just a newline delimited file of input/output paths. See [#usage](#usage) for more info.
+`gass` accepts a list of sources in form of a "Gassfile." Which is really just a newline delimited file of input/output paths. See [usage](#usage) for more info.
 
 # Installing
 
@@ -11,6 +11,9 @@ This is honestly just something I wrote for myself, but if you find yourself nee
 ```sh
 $ go install github.com/holedaemon/gass@latest
 ```
+
+> [!WARNING]
+> gass has only been tested on Linux. I imagine it will work on other operating systems, but it has not been explicitly tested!!
 
 # Usage
 
