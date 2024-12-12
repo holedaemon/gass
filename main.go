@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/bep/godartsass/v2"
 	"github.com/holedaemon/gass/internal/logger"
 	"github.com/holedaemon/gass/internal/sass"
 	"github.com/holedaemon/gass/internal/version"
@@ -20,7 +19,6 @@ func main() {
 	compressed := flag.Bool("c", false, "Compress CSS output?")
 	sourceMaps := flag.Bool("m", true, "Generate source maps?")
 	embedSources := flag.Bool("e", false, "Embed sources into source maps?")
-	syntaxOpt := flag.String("s", "SCSS", "The type of syntax used by inputs")
 	binary := flag.String("b", "", "Path to dart-sass binary to use")
 	timeout := flag.Duration("t", time.Second*30, "Maximum length of time alloted for transpilation")
 
@@ -64,16 +62,6 @@ func main() {
 
 	if *embedSources {
 		tpOpts = append(tpOpts, sass.EmbedSources())
-	}
-
-	syntax := godartsass.ParseSourceSyntax(*syntaxOpt)
-	switch syntax {
-	case godartsass.SourceSyntaxSASS:
-		tpOpts = append(tpOpts, sass.Sass())
-	case godartsass.SourceSyntaxSCSS:
-		tpOpts = append(tpOpts, sass.SCSS())
-	case godartsass.SourceSyntaxCSS:
-		tpOpts = append(tpOpts, sass.CSS())
 	}
 
 	l.Debug("preparing to transpile")
