@@ -90,9 +90,24 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 		input := src.Input()
 		output := src.Output()
 
-		to := new(transpileOptions)
-		for _, o := range opts {
-			o(to)
+		t.l.Debug("preparing transpiler options")
+
+		relative, err := src.Relative()
+		if err != nil {
+			return fmt.Errorf("collecting relative directories: %w", err)
+		}
+
+		baseDir := src.InputDir()
+		ir := &importResolver{baseDir: baseDir}
+
+		var syntax TranspileOption
+		switch src.Syntax() {
+		case godartsass.SourceSyntaxSASS:
+			syntax = Sass()
+		case godartsass.SourceSyntaxSCSS:
+			syntax = SCSS()
+		case godartsass.SourceSyntaxCSS:
+			syntax = CSS()
 		}
 
 		t.l.Debug("reading input file to string")
@@ -107,16 +122,19 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 
 		inputFile.Close()
 
-		relativeDirs, err := src.Relative()
-		if err != nil {
-			return fmt.Errorf("collecting relative dirs: %w", err)
+		opts = append(opts,
+			IncludePaths(relative...),
+			ImportResolver(ir),
+			Source(buf.String()),
+			syntax,
+		)
+
+		to := new(transpileOptions)
+		for _, o := range opts {
+			o(to)
 		}
 
-		t.l.Debug("converting options into arguments")
-
-		baseDir := src.InputDir()
-		ir := &importResolver{baseDir: baseDir}
-		args, err := to.Args(buf.String(), ir, relativeDirs...)
+		args, err := to.Args()
 		if err != nil {
 			return fmt.Errorf("creating args: %w", err)
 		}

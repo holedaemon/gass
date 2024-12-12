@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/bep/godartsass/v2"
 )
 
 // Source represents a collection of paths used to transpile Sass to CSS.
@@ -56,6 +58,11 @@ func (s *Source) Input() string {
 // InputDir returns the directory of the Source's input.
 func (s *Source) InputDir() string {
 	return filepath.Dir(s.input)
+}
+
+// Syntax returns the syntax used by the input based on its file extension.
+func (s *Source) Syntax() godartsass.SourceSyntax {
+	return DetermineSourceSyntax(filepath.Ext(s.input))
 }
 
 // Relative returns a slice containing absolute paths to directories relative

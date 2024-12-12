@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/bep/godartsass/v2"
+	"github.com/holedaemon/gass/internal/gassfile"
 )
 
 // importResolver is responsible for resolving imports present within an input
@@ -53,19 +54,10 @@ func (r *importResolver) CanonicalizeURL(url string) (string, error) {
 // Load loads the content of a canonical URL and returns it as a
 // [godartsass.Import].
 func (r *importResolver) Load(url string) (godartsass.Import, error) {
-	imp := godartsass.Import{}
 	clean := strings.TrimPrefix(url, "file://")
-	ext := strings.ToLower(filepath.Ext(clean))
-
-	switch ext {
-	case ".scss":
-		imp.SourceSyntax = godartsass.SourceSyntaxSCSS
-	case ".sass":
-		imp.SourceSyntax = godartsass.SourceSyntaxSASS
-	case ".css":
-		imp.SourceSyntax = godartsass.SourceSyntaxCSS
-	default:
-		imp.SourceSyntax = godartsass.SourceSyntaxSCSS
+	syntax := gassfile.DetermineSourceSyntax(filepath.Ext(clean))
+	imp := godartsass.Import{
+		SourceSyntax: syntax,
 	}
 
 	file, err := os.Open(clean)

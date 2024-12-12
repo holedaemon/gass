@@ -12,18 +12,22 @@ type transpileOptions struct {
 	style        godartsass.OutputStyle
 	sourceMaps   bool
 	embedSources bool
+
+	ir           godartsass.ImportResolver
+	includePaths []string
+	source       string
 }
 
 // Args converts specified options into a [godartsass.Args].
-func (to *transpileOptions) Args(src string, ir godartsass.ImportResolver, includePaths ...string) (godartsass.Args, error) {
+func (to *transpileOptions) Args() (godartsass.Args, error) {
 	args := godartsass.Args{
-		Source:                  src,
+		Source:                  to.source,
 		SourceSyntax:            to.syntax,
 		OutputStyle:             to.style,
 		EnableSourceMap:         to.sourceMaps,
 		SourceMapIncludeSources: to.embedSources,
-		ImportResolver:          ir,
-		IncludePaths:            includePaths,
+		ImportResolver:          to.ir,
+		IncludePaths:            to.includePaths,
 	}
 
 	if args.Source == "" {
@@ -35,6 +39,29 @@ func (to *transpileOptions) Args(src string, ir godartsass.ImportResolver, inclu
 
 // TranspileOption is used to configure a *[godartsass.Transpiler].
 type TranspileOption func(*transpileOptions)
+
+// Source configures the source of a *[godartsass.Transpiler].
+func Source(content string) TranspileOption {
+	return func(to *transpileOptions) {
+		to.source = content
+	}
+}
+
+// ImportResolver configures a *[godartsass.Transpiler] to use the given import
+// resolver.
+func ImportResolver(ir godartsass.ImportResolver) TranspileOption {
+	return func(to *transpileOptions) {
+		to.ir = ir
+	}
+}
+
+// IncludePaths configures a *[godartsass.Transpiler] to resolve imports using
+// the given paths.
+func IncludePaths(paths ...string) TranspileOption {
+	return func(to *transpileOptions) {
+		to.includePaths = paths
+	}
+}
 
 // Compressed configures a *[godartsass.Transpiler] to output minified CSS.
 func Compressed() TranspileOption {
