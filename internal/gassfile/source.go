@@ -53,6 +53,11 @@ func (s *Source) Input() string {
 	return s.input
 }
 
+// InputDir returns the directory of the Source's input.
+func (s *Source) InputDir() string {
+	return filepath.Dir(s.input)
+}
+
 // Relative returns a slice containing absolute paths to directories relative
 // to the input of the Source.
 func (s *Source) Relative() ([]string, error) {

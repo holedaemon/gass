@@ -113,7 +113,10 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 		}
 
 		t.l.Debug("converting options into arguments")
-		args, err := to.Args(buf.String(), new(ImportResolver), relativeDirs...)
+
+		baseDir := src.InputDir()
+		ir := &importResolver{baseDir: baseDir}
+		args, err := to.Args(buf.String(), ir, relativeDirs...)
 		if err != nil {
 			return fmt.Errorf("creating args: %w", err)
 		}

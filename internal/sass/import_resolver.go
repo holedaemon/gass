@@ -1,7 +1,7 @@
 package sass
 
 import (
-	"fmt"
+	"bytes"
 	"os"
 	"path/filepath"
 	"slices"
@@ -10,15 +10,15 @@ import (
 	"github.com/bep/godartsass/v2"
 )
 
-// ImportResolver is responsible for resolving imports present within an input
-// file. It implements the [godartsass.ImportResolver] interface.
-type ImportResolver struct {
+// importResolver is responsible for resolving imports present within an input
+// file. It implements the [godartsass.importResolver] interface.
+type importResolver struct {
 	baseDir string
 }
 
 // CanonicalizeURL creates a canonical version of the given URL, assuming it
 // can resolve it. Otherwise, it will return an empty string.
-func (r *ImportResolver) CanonicalizeURL(url string) (string, error) {
+func (r *importResolver) CanonicalizeURL(url string) (string, error) {
 	dir, file := filepath.Split(url)
 	wholeDir := filepath.Join(r.baseDir, dir)
 
@@ -37,6 +37,12 @@ func (r *ImportResolver) CanonicalizeURL(url string) (string, error) {
 	})
 
 	if hasFile {
+		ext := filepath.Ext(file)
+		if ext == "" {
+			// Assume the input is using Scss if there is no explicit extension.
+			file += ".scss"
+		}
+
 		wholePath := filepath.Join(wholeDir, file)
 		return "file://" + wholePath, nil
 	}
@@ -46,7 +52,34 @@ func (r *ImportResolver) CanonicalizeURL(url string) (string, error) {
 
 // Load loads the content of a canonical URL and returns it as a
 // [godartsass.Import].
-func (r *ImportResolver) Load(url string) (godartsass.Import, error) {
-	fmt.Println(url)
-	return godartsass.Import{}, nil
+func (r *importResolver) Load(url string) (godartsass.Import, error) {
+	imp := godartsass.Import{}
+	clean := strings.TrimPrefix(url, "file://")
+	ext := strings.ToLower(filepath.Ext(clean))
+
+	switch ext {
+	case ".scss":
+		imp.SourceSyntax = godartsass.SourceSyntaxSCSS
+	case ".sass":
+		imp.SourceSyntax = godartsass.SourceSyntaxSASS
+	case ".css":
+		imp.SourceSyntax = godartsass.SourceSyntaxCSS
+	default:
+		imp.SourceSyntax = godartsass.SourceSyntaxSCSS
+	}
+
+	file, err := os.Open(clean)
+	if err != nil {
+		return godartsass.Import{}, err
+	}
+
+	defer file.Close()
+
+	var buf bytes.Buffer
+	if _, err := file.WriteTo(&buf); err != nil {
+		return godartsass.Import{}, err
+	}
+
+	imp.Content = buf.String()
+	return imp, nil
 }
