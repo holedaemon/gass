@@ -14,7 +14,38 @@ $ go install github.com/holedaemon/gass@latest
 
 # Usage
 
-After installing, one may invoke the tool by calling `gass` in a shell
+Once installed, `gass` will be available in your shell under the same name (assuming you have $GOBIN in your $PATH). All one needs to get started is a Gassfile:
+
+## Gassfile
+
+As mentioned, a Gassfile is just a newline delimited plaintext file. Each line should contain a pair of sources in form of an input file and output. e.g.
+
+```txt
+/home/max/git/github.com/holedaemon/gass/testdata/input.scss /home/max/git/github.com/holedaemon/gass/testdata/output
+```
+
+The input MUST lead to a file, while the output can lead to either a file or directory. When using the latter, the output CSS file will have the same name as the input.
+
+> [!WARNING]
+> Both the input and output MUST be an absolute path.
+
+The Gassfile also "supports" comments. If a line starts with '#', `gass` will skip it.
+
+## Flags
+
+If you want to fine-tune the transpiler or its output, `gass` provides a number of configuration options via flags.
+
+```
+-v               Prints the current version and exits      | Default: false
+
+-d               Runs gass in debug mode                   | Default: false
+-f string        Set the path of your Gassfile             | Default: ".gassfile"
+-b string        Set the path to your dart-sass binary     | Default: ""
+-t duration      Set the transpilation timeout             | Default: 30s
+
+-c               Tells gass to minify outputs              | Default: false
+-m               Tells gass to generate source maps        | Default: true
+```
 
 # How it works
 
