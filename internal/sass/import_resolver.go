@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/bep/godartsass/v2"
@@ -12,7 +11,7 @@ import (
 )
 
 // importResolver is responsible for resolving imports present within an input
-// file. It implements the [godartsass.importResolver] interface.
+// file. It implements the [godartsass.ImportResolver] interface.
 type importResolver struct {
 	baseDir string
 }
@@ -20,31 +19,42 @@ type importResolver struct {
 // CanonicalizeURL creates a canonical version of the given URL, assuming it
 // can resolve it. Otherwise, it will return an empty string.
 func (r *importResolver) CanonicalizeURL(url string) (string, error) {
+	// Return the directory and file of the URL.
+	// If dir is empty, then the file is in the base directory.
 	dir, file := filepath.Split(url)
-	wholeDir := filepath.Join(r.baseDir, dir)
+	if dir == "" {
+		dir = r.baseDir
+	} else {
+		dir = filepath.Join(r.baseDir, dir)
+	}
 
-	entries, err := os.ReadDir(wholeDir)
+	// Get a slice containing the files in the directory.
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return "", err
 	}
 
-	hasFile := slices.ContainsFunc(entries, func(e os.DirEntry) bool {
-		if e.IsDir() {
-			return false
+	// Iterate each file in files and check if it matches the file in URL.
+	// We also check to see if the file is a partial, e.g. starts with an
+	// underscore.
+	hasFile, isPartial := containsFile(files, file)
+	if hasFile {
+		name := file
+
+		// If the file is a partial, make sure we reflect that in the
+		// canonical URL.
+		if isPartial {
+			name = "_" + name
 		}
 
-		name := strings.TrimPrefix(e.Name(), "_")
-		return strings.HasPrefix(name, file)
-	})
-
-	if hasFile {
+		// If the file's extension is blank, assume it is using SCSS syntax.
 		ext := filepath.Ext(file)
 		if ext == "" {
-			// Assume the input is using Scss if there is no explicit extension.
-			file += ".scss"
+			name = name + ".scss"
 		}
 
-		wholePath := filepath.Join(wholeDir, file)
+		// Create the entire path and return it with the appropriate protocol.
+		wholePath := filepath.Join(dir, name)
 		return "file://" + wholePath, nil
 	}
 
