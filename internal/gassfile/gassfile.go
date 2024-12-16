@@ -19,30 +19,13 @@ var (
 	validExts = []string{".scss", ".sass", ".css"}
 )
 
+// Gassfile is a plaintext file containing a collecton of *[Source], delimited
+// by newlines.
 type Gassfile struct {
 	sources []*Source
 }
 
-// Load opens the file at the given path and attempts to load it as a Gassfile.
-func Load(path string) (*Gassfile, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("%w: opening file", err)
-	}
-
-	defer file.Close()
-
-	sources, err := scan(file)
-	if err != nil {
-		return nil, fmt.Errorf("%w: collecting sources", err)
-	}
-
-	return &Gassfile{
-		sources: sources,
-	}, nil
-}
-
-// Sources returns an iterator over the Gassfile's sources.
+// Sources returns an iterator over g's list of *[Source].
 func (g *Gassfile) Sources() iter.Seq[*Source] {
 	return func(yield func(*Source) bool) {
 		for _, s := range g.sources {
@@ -53,10 +36,34 @@ func (g *Gassfile) Sources() iter.Seq[*Source] {
 	}
 }
 
+// NewFromReader creates a new *[Gassfile] from the given [io.Reader].
+func NewFromReader(r io.Reader) (*Gassfile, error) {
+	sources, err := scan(r)
+	if err != nil {
+		return nil, fmt.Errorf("collecting sources: %w", err)
+	}
+
+	return &Gassfile{
+		sources: sources,
+	}, nil
+}
+
+// New creates a new *[Gassfile] from the given path.
+func New(path string) (*Gassfile, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("opening file: %w", err)
+	}
+
+	defer file.Close()
+
+	return NewFromReader(file)
+}
+
 // scan creates a scanner for the input r and iterates over each line of the
 // file. If a line starts with '#', it's accepted as a comment, otherwise the
 // line is split by ' ' and the resulting substrings are used as IO for a
-// [Source].
+// *[Source].
 func scan(r io.Reader) ([]*Source, error) {
 	scanner := bufio.NewScanner(r)
 	sources := make([]*Source, 0)

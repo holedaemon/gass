@@ -65,7 +65,15 @@ func main() {
 	}
 
 	l.Debug("preparing to transpile")
-	if err := r.Transpile(*gassfilePath, tpOpts...); err != nil {
+
+	switch *gassfilePath {
+	case "-":
+		err = r.TranspileFromReader(os.Stdin, tpOpts...)
+	default:
+		err = r.Transpile(*gassfilePath, tpOpts...)
+	}
+
+	if err != nil {
 		l.Error("error transpiling sources", slog.Any("error", err.Error()))
 		os.Exit(1)
 	}

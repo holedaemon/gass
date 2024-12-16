@@ -5,6 +5,7 @@ package sass
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"time"
@@ -73,16 +74,7 @@ func (t *Transpiler) Close() error {
 	return t.tp.Close()
 }
 
-// Transpile converts Scss source files into CSS. The path argument should be
-// a valid *[gassfile.Gassfile], which will be used to load input sources.
-// Consumers may pass options to configure the underlying
-// *[godartsass.Transpiler].
-func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
-	gs, err := gassfile.Load(path)
-	if err != nil {
-		return fmt.Errorf("loading gassfile: %w", err)
-	}
-
+func (t *Transpiler) transpile(gs *gassfile.Gassfile, opts ...TranspileOption) error {
 	t.l.Debug("iterating sources")
 
 	var buf bytes.Buffer
@@ -117,7 +109,7 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 		}
 
 		if _, err := inputFile.WriteTo(&buf); err != nil {
-			return fmt.Errorf("copying to input file: %w", err)
+			return fmt.Errorf("copying input file: %w", err)
 		}
 
 		inputFile.Close()
@@ -162,7 +154,7 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 			outputMap := src.OutputMap()
 			outputMapFile, err := os.Create(outputMap)
 			if err != nil {
-				return fmt.Errorf("creating/trunating output map file: %w", err)
+				return fmt.Errorf("creating/truncating output map file: %w", err)
 			}
 
 			if _, err := outputMapFile.WriteString(res.SourceMap); err != nil {
@@ -175,4 +167,30 @@ func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
 
 	t.l.Debug("finished transpiling sources")
 	return nil
+}
+
+// Transpile converts Sass source files into CSS. The given path should be
+// a valid *[gassfile.Gassfile], which will be used to load input sources.
+// Consumers may pass options to configure the underlying
+// *[godartsass.Transpiler].
+func (t *Transpiler) Transpile(path string, opts ...TranspileOption) error {
+	gs, err := gassfile.New(path)
+	if err != nil {
+		return fmt.Errorf("loading gassfile: %w", err)
+	}
+
+	return t.transpile(gs, opts...)
+}
+
+// TranspileFromReader converts Sass source files into CSS. The given
+// [io.Reader] should be a valid *[gassfile.Gassfile], which will be used
+// to load input sources. Consumers may pass options to configure the
+// underlying *[godartsass.Transiler].
+func (t *Transpiler) TranspileFromReader(r io.Reader, opts ...TranspileOption) error {
+	gs, err := gassfile.NewFromReader(r)
+	if err != nil {
+		return fmt.Errorf("loading gassfile: %w", err)
+	}
+
+	return t.transpile(gs, opts...)
 }
