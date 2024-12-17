@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/bep/godartsass/v2"
@@ -17,11 +16,6 @@ type Source struct {
 	output string
 }
 
-// NewSource creates a new Source from the given inputs and output.
-// Output should be an absolute path to a directory in which transpiled
-// CSS files are output.
-// Inputs should be one or more absolute paths to a Sass source file. Globs are
-// accepted.
 func NewSource(input, output string) (*Source, error) {
 	if input == "" {
 		return nil, errors.New("gassfile: source: input is blank")
@@ -31,17 +25,15 @@ func NewSource(input, output string) (*Source, error) {
 		return nil, errors.New("gassfile: source: output is blank")
 	}
 
-	if !filepath.IsAbs(input) {
-		return nil, fmt.Errorf("gassfile: source: %s is not an absolute path", input)
+	var err error
+	input, err = resolveSource(input)
+	if err != nil {
+		return nil, fmt.Errorf("resolving input: %w", err)
 	}
 
-	if !filepath.IsAbs(output) {
-		return nil, fmt.Errorf("gassfile: source: %s is not an absolute path", output)
-	}
-
-	ext := filepath.Ext(input)
-	if !slices.Contains(validExts, ext) {
-		return nil, fmt.Errorf("gassfile: source: %s ends with an unrecognized extension", input)
+	output, err = resolveSource(output)
+	if err != nil {
+		return nil, fmt.Errorf("resolving output: %w", err)
 	}
 
 	return &Source{
